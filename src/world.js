@@ -1,3 +1,4 @@
+import { makeActor } from "./actors.js";
 import * as T from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 
@@ -23,28 +24,6 @@ const group = (parent, x = 0, y = 0, z = 0) => {
   obj.position.set(x, y, z);
   return obj;
 };
-function lathe(profile) {
-  return new T.LatheGeometry(
-    profile.map(([r, y]) => new T.Vector2(r, y)),
-    16,
-  );
-}
-geo.shirt = lathe([
-  [0.66, -0.5],
-  [0.79, -0.46],
-  [0.81, -0.17],
-  [0.92, 0.19],
-  [1, 0.34],
-  [0.79, 0.44],
-  [0.38, 0.5],
-]);
-geo.trouser = lathe([
-  [0.68, -0.5],
-  [0.79, -0.46],
-  [0.87, -0.17],
-  [0.98, 0.22],
-  [1, 0.5],
-]);
 const temp = new T.Object3D();
 function part(
   parent,
@@ -103,173 +82,6 @@ const skins = [
   "#ce9a76",
   "#dba889",
 ];
-const tops = [
-  "#75483b",
-  "#d3bd8e",
-  "#fff3cf",
-  "#262a30",
-  "#242b31",
-  "#eee3cf",
-  "#585962",
-  "#a45d84",
-];
-function puppet(id) {
-  const root = new T.Group(),
-    body = group(root),
-    torso = group(body, 0, 0.94, 0),
-    head = group(body, 0, 1.65, 0);
-  const skin = skins[id],
-    shirt = tops[id],
-    hair = [
-      "#2c2528",
-      "#674e3d",
-      "#352b2b",
-      "#2e2728",
-      "#272628",
-      "#3d302c",
-      "#332c2b",
-      "#b88543",
-    ][id];
-  const width = [0.46, 0.49, 0.44, 0.5, 0.39, 0.46, 0.51, 0.4][id],
-    pants = [
-      "#c8ba9e",
-      "#38404a",
-      "#42404a",
-      "#344557",
-      "#272a31",
-      "#cbbcaa",
-      "#39414a",
-      "#d1c1af",
-    ][id];
-  // Sculpt the figure from overlapping volumes, retaining individual joint pivots.
-  part(torso, "shirt", shirt, 0, 0.205, 0, width * 0.54, 0.6, 0.167);
-  cyl(torso, skin, 0, 0.53, 0, 0.14, 0.19, 0.14);
-  ball(torso, shirt, 0, 0.44, 0, width * 0.83, 0.13, 0.29);
-  if (id === 1) {
-    box(torso, "#383b3a", 0, 0.22, 0.15, 0.035, 0.56, 0.025, 0, 0, -0.54);
-    ball(torso, "#353738", -0.14, 0.02, 0.14, 0.19, 0.17, 0.08);
-  }
-  if (id === 2) {
-    for (let a = -2; a <= 2; a++)
-      box(
-        torso,
-        "#c8a752",
-        a * 0.057,
-        0.23,
-        0.146 - Math.abs(a) * 0.009,
-        0.009,
-        0.43,
-        0.009,
-      );
-  }
-  if (id === 4) {
-    box(torso, "#eee6d9", 0, 0.24, 0.146, 0.06, 0.45, 0.012, 0, 0, -0.57);
-    box(torso, "#b83b37", 0.095, 0.35, 0.15, 0.052, 0.017, 0.014);
-    box(torso, "#b83b37", 0.095, 0.35, 0.151, 0.017, 0.052, 0.014);
-  }
-  if (id === 5 || id === 1) {
-    for (let s of [-1, 1])
-      box(
-        torso,
-        shirt,
-        s * 0.051,
-        0.455,
-        0.116,
-        0.076,
-        0.095,
-        0.025,
-        -0.2,
-        0,
-        s * 0.43,
-      );
-  }
-  ball(head, skin, 0, -0.015, 0, 0.323, 0.409, 0.314);
-  ball(head, skin, 0, -0.105, 0.023, 0.25, 0.218, 0.26);
-  for (let s of [-1, 1]) {
-    ball(head, skin, 0.153 * s, -0.016, 0.005, 0.062, 0.091, 0.045);
-    ball(head, "#f4dfcb", 0.062 * s, 0.009, 0.14, 0.052, 0.024, 0.019);
-    ball(head, "#38312c", s * 0.061, 0.009, 0.151, 0.019, 0.021, 0.011);
-    box(
-      head,
-      hair,
-      s * 0.062,
-      0.042,
-      0.142,
-      0.061,
-      0.014,
-      0.014,
-      0,
-      0,
-      s * 0.08,
-    );
-  }
-  ball(head, skin, 0, -0.037, 0.159, 0.047, 0.068, 0.052);
-  ball(head, "#995d50", 0, -0.09, 0.141, 0.085, 0.012, 0.014);
-  ball(head, hair, 0, 0.115, -0.022, 0.329, id === 0 ? 0.18 : 0.23, 0.321);
-  if (id !== 0)
-    for (let k = 0; k < 9; k++) {
-      let a = k * 2.399;
-      ball(
-        head,
-        hair,
-        0.115 * Math.cos(a),
-        0.173 + Math.sin(k * 0.9) * 0.017,
-        0.089 * Math.sin(a) + 0.014,
-        id === 3 ? 0.132 : 0.105,
-        id === 3 ? 0.126 : 0.076,
-        0.11,
-      );
-    }
-  if ([1, 4, 6].includes(id))
-    ball(head, hair, 0, -0.073, 0.145, 0.093, 0.016, 0.014);
-  if (id === 1 || id === 6) {
-    ball(head, hair, 0, -0.142, 0.043, 0.206, 0.074, 0.207);
-    for (let s of [-1, 1])
-      ball(head, hair, s * 0.113, -0.092, 0.042, 0.052, 0.111, 0.134);
-  }
-  const specs = group(head, 0, 0.01, 0.153);
-  for (let s of [-1, 1])
-    box(specs, "#222a34", s * 0.064, 0, 0, 0.109, 0.05, 0.015);
-  box(specs, "#434443", 0, 0.009, 0.006, 0.05, 0.012, 0.012);
-  specs.visible = false;
-  const arms = [],
-    legs = [];
-  for (let s of [-1, 1]) {
-    let a = group(body, s * width * 0.47, 1.31, 0);
-    a.rotation.z = s * 0.12;
-    arms.push(a);
-    ball(a, shirt, 0, -0.08, 0, 0.17, 0.232, 0.177);
-    ball(a, skin, 0, -0.23, 0, 0.119, 0.252, 0.131);
-    ball(a, skin, 0, -0.402, 0.023, 0.102, 0.209, 0.109);
-    ball(a, skin, 0, -0.5, 0.036, 0.108, 0.134, 0.1);
-    let l = group(body, s * 0.102, 0.89, 0);
-    legs.push(l);
-    part(l, "trouser", pants, 0, -0.212, 0, 0.098, 0.49, 0.108);
-    part(
-      l,
-      "trouser",
-      id === 4 || id === 6 ? skin : pants,
-      0,
-      -0.591,
-      0,
-      0.075,
-      0.4,
-      0.082,
-    );
-    ball(
-      l,
-      id === 4 ? "#a04634" : "#e7dfcf",
-      0,
-      -0.813,
-      0.043,
-      0.156,
-      0.117,
-      0.278,
-    );
-  }
-  bake(root);
-  return { root, body, arms, legs, specs };
-}
 function sign(root, value, x, y, z, w, h, bg = "#1c4641") {
   let cv = document.createElement("canvas");
   cv.width = 512;
@@ -332,15 +144,19 @@ function chair(r, x, z) {
   cyl(r, "#4d5553", x, 0.055, z, 0.51, 0.07, 0.51);
 }
 function building(r, x, z, w, letter) {
-  box(r, "#d1cbb2", x, 1.4, z, w, 2.8, 3);
+  const wing = (w - 2.8) / 2;
+  for (const side of [-1, 1])
+    box(r, "#d1cbb2", x + side * (1.4 + wing / 2), 1.4, z, wing, 2.8, 3);
   box(r, "#f2ddbc", x, 2.86, z, w + 0.65, 0.23, 3.9);
   for (let k = 0; k < Math.floor(w / 2); k++) {
     let xx = x - w / 2 + 1.15 + k * 2;
+    if (Math.abs(xx - x) < 1.55) continue;
     box(r, "#4d6c68", xx, 1.57, z + 1.52, 1.22, 1, 0.06);
     box(r, "#c4c1a8", xx, 1.56, z + 1.57, 0.055, 1, 0.04);
     box(r, "#dfd9bd", xx - 0.78, 1.35, z + 1.88, 0.12, 2.7, 0.15);
   }
   sign(r, "H8  " + letter, x + w / 2 - 1.3, 2.4, z + 1.58, 1.9, 0.42);
+  sign(r, "HALL  " + letter, x, 2.69, z + 1.75, 1.5, 0.3);
 }
 function sceneArt(r, a) {
   let club = ["club", "bar", "mango", "arena"].includes(a),
@@ -409,8 +225,9 @@ function sceneArt(r, a) {
     }
   }
   if (a === "h8" || a === "yard") {
-    for (let k = 0; k < 3; k++)
-      building(r, (k - 1) * 5, -9 - k * 7, 26, "BCA"[k]);
+    box(r, "#c2b69a", 1, 0.015, -14, 2.8, 0.03, 20);
+    box(r, "#f1dfbd", 1, 2.83, -16, 2.67, 0.14, 14);
+    for (let k = 0; k < 3; k++) building(r, 1, -9 - k * 7, 26, "CBA"[k]);
     for (let k = 0; k < 18; k++) {
       let x = (k % 2 ? 1 : -1) * (13 + (Math.floor(k / 2) % 3) * 2.3);
       tree(r, x, 6 - Math.floor(k / 2) * 3, 1.05 + (k % 3) * 0.16);
@@ -634,8 +451,8 @@ function create(canvas) {
       opacity: 0.19,
       depthWrite: false,
     });
-  const actors = Array.from({ length: 8 }, (_, id) => {
-    let rig = puppet(id);
+  const actors = Array.from({ length: 9 }, (_, id) => {
+    let rig = makeActor(id);
     let sh = new T.Mesh(shadowGeo, shadowMat);
     sh.rotation.x = -Math.PI / 2;
     sh.position.y = 0.018;
@@ -691,7 +508,9 @@ function create(canvas) {
       for (let i = 0; i < 20; i++) {
         let sprite = new T.Group();
         let x = -10 + (i % 10) * 2.12,
-          z = -4.7 - Math.floor(i / 10) * 0.73;
+          z = i < 10 ? -4.7 : -2.4 + ((i * 7) % 11) * 0.55;
+        sprite.userData.home = { x, z };
+        sprite.rotation.y = i * 2.39;
         sprite.position.set(x, 0, z);
         let col = ["#685477", "#d68764", "#508782", "#79875d", "#bf7f94"][
           i % 5
@@ -769,25 +588,125 @@ function create(canvas) {
     cyl(barrel, "#777781", 0, -0.045, 0, 0.34, 0.028, 0.27);
     bake(barrel);
   }
+  const warning = new T.Mesh(
+    new T.RingGeometry(0.94, 1.05, 48),
+    new T.MeshBasicMaterial({ color: 0xff982f, side: T.DoubleSide }),
+  );
+  warning.rotation.x = -Math.PI / 2;
+  world.add(warning);
+  const pulse = new T.Mesh(
+    new T.CylinderGeometry(0.048, 0.048, 1, 8),
+    new T.MeshBasicMaterial({ color: 0xc4ffff }),
+  );
+  world.add(pulse);
+  const haze = Array.from({ length: 5 }, () => {
+    const puff = new T.Mesh(
+      geo.ball,
+      new T.MeshBasicMaterial({
+        color: 0xcbd1c2,
+        transparent: true,
+        opacity: 0.28,
+        depthWrite: false,
+      }),
+    );
+    world.add(puff);
+    return puff;
+  });
+  let shot = null,
+    frameDt = 0;
   function setRig(id, x, z, yaw, walk, dancing, time, showSpecs) {
-    let p = actors[id];
+    const p = actors[id],
+      s = shot,
+      lead = id === s.hero,
+      speaking = id === s.speaker;
+    let pose = walk
+        ? s.running && lead
+          ? "sprint"
+          : "walk"
+        : dancing
+          ? "dance"
+          : "idle",
+      face = dancing ? "happy" : "neutral",
+      item = null;
+    if (!walk && (s.intoxicated || (s.mission === 1 && s.area === "bar")))
+      pose = "dizzy";
+    if (dancing) {
+      pose = "dance";
+      if (id === 2) item = "cig";
+    }
+    if (lead && s.fx && s.fxTime > 0) {
+      let motions = [
+        "drink",
+        "drink",
+        "dance",
+        "vape",
+        "dance",
+        "think",
+        "vape",
+      ];
+      pose = motions[id];
+      item = ["cup", "cup", "cig", "cig", null, "book", "vape"][id];
+    }
+    if (speaking && !walk) {
+      pose = "talk";
+      face = "happy";
+    }
+    if (lead && s.jump > 0) pose = "jump";
+    if (s.drinker === id) {
+      pose = "toast";
+      face = "grin";
+      item = "cup" + (s.beerIndex ?? 0);
+    }
+    if (s.beatScene === "mic" && id === 2) {
+      pose = "raise";
+      item = "mic";
+    }
+    if (s.beatScene === "briga" && s.voices.some((v) => v.id === id))
+      pose = "wave";
+    if (s.beatScene === "foto") {
+      pose = "celebrate";
+      face = "grin";
+    }
+    if (s.beatScene === "moniz") pose = id === 4 ? "sleep" : "sit";
+    if (s.beatScene === "beijo" || s.beatScene === "tapa") {
+      if (id === 0 || id === 7) {
+        x = X(711) + (id === 0 ? -0.2 : 0.2);
+        z = Z(405);
+        yaw = id === 0 ? Math.PI / 2 : -Math.PI / 2;
+        pose =
+          s.beatScene === "beijo"
+            ? "flirt"
+            : id === 0
+              ? "embarrassed"
+              : "point";
+        face =
+          s.beatScene === "beijo" ? "happy" : id === 0 ? "shock" : "annoyed";
+      } else pose = s.beatScene === "beijo" ? "celebrate" : "laugh";
+    }
+    if (id === 8) pose = speaking ? "point" : "think";
+    if (!walk && speaking && id !== s.hero)
+      yaw = Math.atan2(X(s.pos.x) - x, Z(s.pos.y) - z);
     p.root.visible = true;
-    p.root.position.set(x, 0, z);
+    p.root.position.set(x, lead ? s.jump : 0, z);
     p.root.rotation.y = yaw;
-    p.body.position.y =
-      Math.abs(Math.sin(time)) * walk * 0.05 +
-      (dancing ? 0.045 * Math.sin(time * 1.8) : 0);
-    p.body.rotation.z = dancing ? 0.13 * Math.sin(time) : 0;
-    p.arms.forEach((a, i) => {
-      let side = i === 0 ? -1 : 1;
-      a.rotation.x =
-        Math.sin(time + i * Math.PI) * walk * 0.59 + (dancing ? -0.7 : 0);
-      a.rotation.z = side * (dancing ? 0.53 + 0.36 * Math.cos(time) : 0.12);
-    });
-    p.legs.forEach((l, i) => {
-      l.rotation.x = Math.sin(time + i * Math.PI) * walk * -0.59;
-    });
     p.specs.visible = showSpecs;
+    if (id === 3 && lead && s.fxTime > 1.3) {
+      pose = "think";
+      item = "paper";
+    }
+    if (s.beatScene === "console" && id === 6) {
+      pose = "game";
+      face = "shock";
+    }
+    if (s.beatScene === "moniz" && id === 4) face = "sleepy";
+    p.animate(
+      frameDt,
+      pose,
+      walk * (s.running && lead ? 9 : 4),
+      face,
+      speaking,
+      item,
+    );
   }
   function frame(s) {
     if (s.area !== current) rebuild(s.area);
@@ -804,6 +723,8 @@ function create(canvas) {
       z = Z(s.pos.y),
       t = s.time,
       dt = prior ? Math.min(0.09, Math.max(0, t - prior.t)) : 0;
+    shot = s;
+    frameDt = dt;
     const dx = prior ? x - prior.x : 0,
       dz = prior ? z - prior.z : 0,
       travel = Math.hypot(dx, dz),
@@ -821,6 +742,19 @@ function create(canvas) {
     }
     const panning = 1 - Math.exp(-6.5 * dt);
     let target = s.mini?.kind === "duel" ? V(-2, 0, -2) : V(x, 0, z);
+    let focusId = s.drinker >= 0 ? s.drinker : s.cinematic ? s.speaker : -1;
+    if (s.beatScene === "foto") {
+      target.set(x - 1, 0, z - 0.5);
+    }
+    if (
+      s.cinematic &&
+      s.beatScene !== "foto" &&
+      focusId >= 0 &&
+      actors[focusId]?.root.visible
+    ) {
+      let f = actors[focusId].root.position;
+      target.set(f.x, 0, f.z);
+    }
     if (!prior) focus.copy(target);
     else focus.lerp(target, panning);
     prior = { x, z, t };
@@ -865,14 +799,34 @@ function create(canvas) {
         false,
       );
     });
+    for (const q of s.locals)
+      setRig(q.id, X(q.x), Z(q.y), q.yaw ?? 0.32, 0, q.dancing, t, false);
     if (s.area === "mango")
       for (let v of s.voices)
         setRig(v.id, X(v.x), Z(v.y), -0.2, 0, true, t * 6 + v.id, false);
+    if (s.girl) actors[7].tint(s.girl.color);
     if (s.girl && s.area === "club")
       setRig(7, X(731), Z(416), -0.35, 0, false, 0, false);
     audience.forEach((a, i) => {
       a.rotation.z = 0.047 * Math.sin(t * 3 + i);
       a.position.y = 0.025 * Math.sin(t * 4 + i);
+      const h = a.userData.home,
+        ax = h.x + 0.29 * Math.sin(t * 0.68 + i),
+        az = h.z + 0.24 * Math.cos(t * 0.73 + i),
+        dx = ax - x,
+        dz = az - z,
+        d = Math.hypot(dx, dz),
+        avoid = Math.max(0, 1.3 - d);
+      a.position.x = T.MathUtils.lerp(
+        a.position.x,
+        ax + (dx / (d || 1)) * avoid,
+        Math.min(1, dt * 6),
+      );
+      a.position.z = T.MathUtils.lerp(
+        a.position.z,
+        az + (dz / (d || 1)) * avoid,
+        Math.min(1, dt * 6),
+      );
     });
     barrel.visible = s.tray;
     if (s.tray) barrel.position.set(x + 0.27, 1.08, z + 0.15);
@@ -891,7 +845,16 @@ function create(canvas) {
       zoom = far
         ? Math.max(15, 20 / camera.aspect)
         : Math.max(6.9, 5.7 / camera.aspect);
-    zoom *= far ? 1 : zoomScale;
+    zoom *= far
+      ? 1
+      : zoomScale *
+        (s.cinematic &&
+        focusId >= 0 &&
+        s.drinker !== 0 &&
+        s.beatScene !== "foto"
+          ? 0.68
+          : 1);
+    if (s.cinematic && s.beatScene === "moniz") zoom *= 1.1;
     let angle = far ? 0 : azimuth;
     camera.position.set(
       focus.x + Math.sin(angle) * zoom,
@@ -914,6 +877,16 @@ function create(canvas) {
       core.scale.setScalar(0.48);
       core.position.z = 0.4;
       m.add(core);
+      // Abstract rival on an arcade pedestal; the illuminated disc is the hit area.
+      let rival = new T.Group();
+      ball(rival, "#796ab6", 0, -0.53, -0.13, 0.44, 0.66, 0.31);
+      ball(rival, "#c49ce8", 0, 0.1, -0.4, 0.36, 0.36, 0.29);
+      for (let side of [-1, 1]) {
+        box(rival, "#695795", side * 0.13, -1, -0.15, 0.14, 0.46, 0.15);
+        ball(rival, "#9a80c6", side * 0.27, -0.46, -0.15, 0.13, 0.45, 0.13);
+      }
+      bake(rival);
+      m.add(rival);
       world.add(m);
       discMeshes.push(m);
     }
@@ -928,6 +901,41 @@ function create(canvas) {
         );
         m.userData.target = q;
       }
+    });
+    if (s.beatScene === "briga") {
+      audience.forEach((a, i) => {
+        a.rotation.z = 0.28 * Math.sin(t * 5 + i);
+        a.position.x += Math.sin(t * 3 + i) * dt * 0.6;
+      });
+    }
+    warning.visible = !!s.wave?.marked && !s.cinematic;
+    if (warning.visible) {
+      warning.position.set(X(s.wave.x), 0.035, Z(s.wave.y));
+      warning.material.color.set(s.wave.t > 5.3 ? 0xff5540 : 0xffba54);
+    }
+    pulse.visible = far && s.flash && t - s.flash.t < 0.22;
+    if (pulse.visible) {
+      let a = V(x, 1.12, z),
+        b = V(X(s.flash.x), 1.45, Z(s.flash.y)),
+        v = b.clone().sub(a);
+      pulse.position.copy(a).lerp(b, 0.5);
+      pulse.scale.y = v.length();
+      pulse.quaternion.setFromUnitVectors(V(0, 1, 0), v.normalize());
+    }
+    const smoking =
+      s.beatScene === "console" || (s.fxTime > 0 && [2, 3, 6].includes(s.hero));
+    haze.forEach((p, i) => {
+      p.visible = smoking;
+      if (!smoking) return;
+      const fire = s.beatScene === "console",
+        k = (t * 0.62 + i / 5) % 1;
+      p.position.set(
+        (fire ? -3.25 : x) + k * 0.25,
+        (fire ? 1.78 : 1.65) + k * 0.92,
+        (fire ? -5.05 : z) + 0.1 * Math.sin(t + i),
+      );
+      p.scale.setScalar(0.09 + k * 0.34);
+      p.material.opacity = 0.43 * (1 - k);
     });
     renderer.render(world, camera);
   }
@@ -947,6 +955,16 @@ function create(canvas) {
     }
     if (hasGoal && ray.intersectObjects(goalMarker.children, false).length)
       return { goal: true };
+    if (!s || s.kind !== "duel") {
+      const roots = actors.filter((p) => p.root.visible).map((p) => p.root),
+        hit = ray.intersectObjects(roots, true)[0];
+      if (hit) {
+        let o = hit.object;
+        while (o && !roots.includes(o)) o = o.parent;
+        const id = actors.findIndex((p) => p.root === o);
+        if (id >= 0 && id !== shot.hero) return { actor: id };
+      }
+    }
     if (ray.ray.intersectPlane(plane, hitPoint))
       return { x: hitPoint.x / 0.022 + 540, y: hitPoint.z / 0.03 + 460 };
   }
@@ -955,6 +973,18 @@ function create(canvas) {
     return { x: (r.x + 1) / 2, y: (1 - r.y) / 2 };
   }
   return {
+    actorPositions: () =>
+      actors.flatMap((p, id) =>
+        p.root.visible
+          ? [
+              {
+                id,
+                x: p.root.position.x / 0.022 + 540,
+                y: p.root.position.z / 0.03 + 460,
+              },
+            ]
+          : [],
+      ),
     frame,
     click,
     marker,
